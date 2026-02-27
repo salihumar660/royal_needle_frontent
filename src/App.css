@@ -32,7 +32,346 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
+.content-row {
+  display: flex;
+  gap: 16px;
+  height: 75vh;
+}
+
+/* Search form */
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* space between elements */
+  flex-wrap: nowrap;
+  /* keep everything in single row */
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.search-form label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.search-form select,
+.search-form input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.search-form select:focus,
+.search-form input:focus {
+  outline: none;
+  border-color: #198754;
+  box-shadow: 0 0 4px rgba(13, 110, 253, 0.3);
+}
+
+.search-form select:hover,
+.search-form input:hover {
+  border-color: #198754;
+}
+
+.search-form .btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #198754;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.search-form .btn:hover {
+  background-color: #198754;
+}
+
+
+
+/* form select */
+.div-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* space between inputs */
+  flex-wrap: wrap;
+  /* wrap on small screens */
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.div-form label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  gap: 6px;
+  /* space between label text and select */
+  font-size: 14px;
+}
+
+.div-form select,
+.div-form input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.div-form select:focus,
+.div-form input:focus {
+  outline: none;
+  border-color: #198754;
+  box-shadow: 0 0 4px rgba(13, 110, 253, 0.3);
+}
+
+/* Optional: hover effect for better UX */
+.div-form select:hover,
+.div-form input:hover {
+  border-color: #198754;
+}
+
+
+/* CARD */
+.div-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.card-title {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* SEARCH */
+.search-input {
+  width: 15%;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  align-items: right;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #198754;
+}
+
+/* FORM */
+.div-form .form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.div-form input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.div-form input:focus {
+  outline: none;
+  border-color: #198754;
+}
+
+/* ACTIONS */
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.btn.primary {
+  background: #0d6efd;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #0b5ed7;
+}
+
+.btn.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn.secondary:hover {
+  background: #5c636a;
+}
+
+
+/* TABLE SIDE */
+.table-wrapper {
+  flex: 0 0 55%;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-btn {
+  color: #198754;
+}
+
+
+.edit-btn:hover {
+  background: #157347 !important;
+  color: #f5f5f5 !important;
+  border-color: #198754 !important;
+}
+
+.dlt-btn:hover {
+  background-color: red !important;
+  color: #f5f5f5 !important;
+}
+
+
+/* MAP SIDE */
+.map-wrapper {
+  flex: 0 0 34.5%;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-custom {
+  flex: 0 0 43.5%;
+}
+
+.map-wrapper .leaflet-container {
+  flex: 1;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reset-btn {
+  color: #fff;
+  background-color: #198754;
+}
+
+.reset-btn:hover {
+  color: #fff !important;
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+}
+
+.ant-modal-footer .ant-btn-default:hover {
+  background-color: #198754;
+  color: #fff;
+  border-color: #198754;
+}
+
+/* Sidebar overall green */
+.ant-layout-sider {
+  background-color: #198754 !important;
+}
+
+.ant-layout-sider-trigger {
+  background-color: #198754 !important;
+  color: #fff !important;
+}
+
+.ant-menu-vertical {
+  background-color: #198754 !important;
+  color: #fff !important;
+}
+
+
+/* Default menu item and submenu text */
+.ant-menu-light .ant-menu-item,
+.ant-menu-light .ant-menu-submenu-title {
+  color: #fff !important;
+  /* always white */
+}
+
+/* Selected child menu item */
+.ant-menu-light .ant-menu-item-selected {
+  background-color: #fff !important;
+  /* white background */
+  color: #198754 !important;
+  /* green text */
+}
+
+/* Selected child icon */
+.ant-menu-light .ant-menu-item-selected .anticon {
+  color: #198754 !important;
+}
+
+/* Keep parent submenu labels white even if child is selected */
+.ant-menu-light .ant-menu-submenu-selected>.ant-menu-submenu-title {
+  color: #fff !important;
+  /* always white */
+}
+
+/* Parent icon also stays white */
+.ant-menu-light .ant-menu-submenu-selected>.ant-menu-submenu-title .anticon {
+  color: #fff !important;
+  background-color: #198754;
+}
+
+/* Hover effect for all items */
+.ant-menu-light .ant-menu-item:hover,
+.ant-menu-light .ant-menu-submenu-title:hover {
+  background-color: #17804f !important;
+  /* slightly lighter green */
+  color: #fff !important;
+}
+
+/* Apply to both input and select inside your Form.Item */
+.form-item-input {
+  width: 100% !important;
+  height: 32px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+}
+
+
+/* select.form-item-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+} */
