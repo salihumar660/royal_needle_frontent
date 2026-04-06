@@ -29,7 +29,8 @@ export default function DistrictList() {
     const [deleteId, setDeleteId] = useState(null);
     const [latitude, setLatitude] = useState("");
     const [longitude, setLongitude] = useState("");
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState("");
+    const [form] = Form.useForm();
     const { confirm } = Modal;
 
     const showDeleteConfirm = (id) => {
@@ -136,6 +137,8 @@ export default function DistrictList() {
                     payload
                 );
             }
+            form.resetFields();
+            setEditId(null);
             setName("");
             setEditId(null);
             setProvinceId("");
@@ -252,7 +255,7 @@ export default function DistrictList() {
                     </Form.Item>
 
                     {/* Submit */}
-                    <div className="form-actions">
+                    <Form.Item wrapperCol={{ offset: 6 }} >
                         <Space>
                             <Button
                                 style={{ backgroundColor: "#198754" }}
@@ -284,17 +287,19 @@ export default function DistrictList() {
                                     className="reset-btn"
                                     icon={<ReloadOutlined />}
                                     onClick={() => {
-                                        setName("");
+                                        setEditId(null);
                                         setProvinceId("");
+                                        setName("");
                                         setLatitude("");
                                         setLongitude("");
                                         setErrors("");
                                     }}
-                                    block
-                                >Reset</Button>
+                                    block>
+                                    Reset
+                                </Button>
                             )}
                         </Space>
-                    </div>
+                    </Form.Item>
                 </Form>
             </div>
             <div style={{ marginBottom: "10px" }} className="search-form">
@@ -351,7 +356,7 @@ export default function DistrictList() {
                             columns={columns}
                             dataSource={dataSource}
                             loading={loading}
-                            pagination={{ pageSize: 10 }}
+                            pagination={{ pageSize: 5 }}
                             locale={{
                                 emptyText: <Empty description="No District Records Found" />,
                             }}

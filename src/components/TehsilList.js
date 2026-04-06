@@ -106,7 +106,7 @@ function TehsilList() {
         if (!provinceId) {
             setformDistricts([]);
             setDistrictId("");
-            return;
+            return Promise.resolve();
         }
         try {
             const res = await axios.get(
@@ -114,14 +114,12 @@ function TehsilList() {
             );
             setformDistricts(res.data);
             setDistrictId("");
+            return Promise.resolve();
         } catch (err) {
             console.error(err);
+            return Promise.reject(err);
         }
     };
-    useEffect(() => {
-        fetchDistrictsByProvince(provinceId);
-    }, [provinceId]);
-    //distircts when province is selected for search
     useEffect(() => {
         const fetchDistricts = async () => {
             if (!selectedProvince) {
@@ -205,9 +203,12 @@ function TehsilList() {
         setEditId(pr.id);
         setName(pr.name);
         setProvinceId(pr.province_id);
-        setDistrictId(pr.district_id);
+        fetchDistrictsByProvince(pr.province_id).then(() => {
+            setDistrictId(pr.district_id);
+        });
         setLatitude(pr.latitude);
         setLongitude(pr.longitude);
+
     };
     const handleDelete = async (id) => {
         try {
@@ -319,7 +320,7 @@ function TehsilList() {
                         />
                     </Form.Item>
                     {/* Action buttons logic */}
-                    <div className="form-actions">
+                    <Form.Item wrapperCol={{ offset: 6 }} >
                         <Space>
                             <Button
                                 style={{ backgroundColor: "#198754" }}
@@ -352,6 +353,7 @@ function TehsilList() {
                                     className="reset-btn"
                                     icon={<ReloadOutlined />}
                                     onClick={() => {
+                                        setEditId(null);
                                         setProvinceId("");
                                         setDistrictId("");
                                         setName("");
@@ -364,7 +366,7 @@ function TehsilList() {
                                 </Button>
                             )}
                         </Space>
-                    </div>
+                    </Form.Item>
                 </Form>
             </div>
             {/* Search block */}
@@ -438,7 +440,7 @@ function TehsilList() {
                             columns={columns}
                             dataSource={dataSource}
                             loading={loading}
-                            pagination={{ pageSize: 10 }}
+                            pagination={{ pageSize: 5 }}
                             locale={{
                                 emptyText: <Empty description="No Tehsil Records Found" />,
                             }}

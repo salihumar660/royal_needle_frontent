@@ -172,7 +172,7 @@ function ProvinceList() {
                         </FormItem>
                     </div>
 
-                    <div className="form-actions">
+                    <Form.Item wrapperCol={{ offset: 6 }} >
                         <Space>
                             <Button
                                 style={{ backgroundColor: "#198754" }}
@@ -198,7 +198,7 @@ function ProvinceList() {
                                 </Button>
                             )}
                         </Space>
-                    </div>
+                    </Form.Item>
                 </Form>
             </div >
             <div style={{ marginBottom: "10px" }} className="search-form">
@@ -231,7 +231,7 @@ function ProvinceList() {
                             columns={columns}
                             dataSource={dataSource}
                             loading={loading}
-                            pagination={{ pageSize: 10 }}
+                            pagination={{ pageSize: 5 }}
                             locale={{
                                 emptyText: <Empty description="No Province Records Found" />,
                             }}
@@ -265,6 +265,7 @@ function ProvinceList() {
                                             parseFloat(pr.latitude),
                                             parseFloat(pr.longitude),
                                         ]}
+                                        icon={greenIcon}
                                     >
                                         <Popup>
                                             <strong>{pr.name}</strong>
