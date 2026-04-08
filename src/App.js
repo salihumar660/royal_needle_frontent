@@ -4,11 +4,12 @@ import ProvinceList from "./components/ProvinceList";
 import DistrictList from "./components/DistrictList";
 import TehsilList from "./components/TehsilList";
 import UserList from "./components/UserList";
+import NaapBook from "./components/NaapBookList";
 
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import { Layout, Menu, Result } from "antd";
-import { AppstoreOutlined, EnvironmentOutlined, BankOutlined, UserOutlined, DashboardOutlined, WindowsOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, EnvironmentOutlined, BankOutlined, UserOutlined, DashboardOutlined, WindowsOutlined, FormOutlined } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
 
@@ -59,9 +60,17 @@ function AppLayout() {
             {
               key: "user",
               icon: <UserOutlined style={{ color: "#fff" }} />,
-              label: "User Management",
+              label: "Membership Management",
               children: [
-                { key: "user", label: "User List" },
+                { key: "user", label: "Members List" },
+              ],
+            },
+            {
+              key: "NaapBook",
+              icon: <FormOutlined style={{ color: "#fff" }} />,
+              label: "NaapBook Management",
+              children: [
+                { key: "NaapBook", label: "NaapBook List" },
               ],
             },
           ]}
@@ -76,6 +85,7 @@ function AppLayout() {
             padding: "0 20px",
             fontSize: "18px",
             fontWeight: "bold",
+            // position: "fixed",
           }}
         >
           Dashboard
@@ -99,6 +109,8 @@ function AppLayout() {
             <Route path="/tehsils" element={<TehsilList />} />
             {/* Users Module */}
             <Route path="/user" element={<UserList />} />
+            {/* NaapBook Module */}
+            <Route path="/naapBook" element={<NaapBook />} />
           </Routes>
         </Content>
       </Layout>

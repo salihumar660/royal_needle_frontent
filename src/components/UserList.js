@@ -3,7 +3,7 @@ import api from '../services/api';
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L, { icon } from "leaflet";
 import axios from "axios";
-import { Row, Table, Empty, Modal, Form, Input, Select, Button, Space, Popconfirm, Result, Col } from "antd";
+import { Row, Table, Empty, Modal, Form, Input, Select, Button, Space, Popconfirm, Result, Col, message } from "antd";
 import "../leafletIconFix";
 import {
     PlusOutlined,
@@ -20,10 +20,9 @@ import {
 const { Option } = Select;
 function Users() {
     const [users, setUsers] = useState([]);
-    // create form states
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [phone, setPhone] = useState("");
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [tehsils, setTehsils] = useState([]);
@@ -34,7 +33,7 @@ function Users() {
     const [editId, setEditId] = useState(null);
     const [selectedName, setSelectedName] = useState("");
     const [selectedEmail, setSelectedEmail] = useState("");
-    const [selectedPassword, setSelectedPassword] = useState("");
+    const [selectedPhone, setSelectedPhone] = useState("");
     const [selectedProvince, setSelectedProvince] = useState("");
     const [selectedDistrict, setSelectedDistrict] = useState("");
     const [selectedTehsil, setSelectedTehsil] = useState("");
@@ -196,35 +195,39 @@ function Users() {
         const { name, value } = e.target;
         setForm({ ...form, [name]: value });
     };
-    const handleSubmit = (values) => {
+    const handleSubmit = async (values) => {
         try {
             if (editId) {
                 // UPDATE
-                api.put(`/users/${editId}`, values).then(() => {
-                    resetForm();
-                    fetchUsers();
-                });
+                await api.put(`/users/${editId}`, values);
+                message.success("Member updated successfully");
             } else {
                 // CREATE
-                api.post("/users", values).then(() => {
-                    resetForm();
-                    fetchUsers();
-                });
+                await api.post("/users", values);
+                message.success("Member added successfully");
             }
+            resetForm();
+            fetchUsers();
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors);
+                message.error("Validation Failed. Please check the form fields.");
             } else {
-                console.error(err);
+                message.error("Something went wrong");
             }
         }
     };
-    const handleEdit = (user) => {
+    const handleEdit = async (user) => {
         setEditId(user.id);
+        await fetchDistrictsByProvince(user.province.id);
+        await fetchTehsilsByDistrict(user.district.id);
         antdForm.setFieldsValue({
             name: user.name,
             email: user.email,
-            password: "",
+            phone: user.phone || "",
+            province_id: user.province.id,
+            district_id: user.district.id,
+            tehsil_id: user.tehsil?.id || "",
         });
     };
 
@@ -238,6 +241,14 @@ function Users() {
         antdForm.resetFields();
     };
     const [antdForm] = Form.useForm();
+    // Watch all form fields
+    const formValues = Form.useWatch([], antdForm);
+    // Check if any field has a value
+    const isFormNotEmpty = () => {
+        return Object.values(formValues || {}).some(
+            value => value !== undefined && value !== ""
+        );
+    };
     const hasFilters = selectedProvince || selectedDistrict || users;
     const greenIcon = new L.Icon({
         iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
@@ -245,70 +256,66 @@ function Users() {
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
     });
+    // Group users by tehsil
+    const groupedUsers = users.reduce((acc, u) => {
+        if (u.tehsil?.id) {
+            acc[u.tehsil.id] = acc[u.tehsil.id] || [];
+            acc[u.tehsil.id].push(u);
+        }
+        return acc;
+    }, {});
     return (
         <div>
             <div className="div-card">
                 <h2 className="card-title">
-                    {editId ? "Edit User" : "Add User"}
+                    {editId ? "Edit Member" : "Add Member"}
                 </h2>
-                <Form onFinish={handleSubmit} className="div-form">
+                <Form form={antdForm} onFinish={handleSubmit} className="div-form">
                     {/* Name */}
                     <Form.Item
                         label="Name"
-                        validateStatus={errors.name ? "error" : ""}
-                        help={errors.name?.[0] || ""}>
-                        <Input type="text" value={name}
-                            className="form-item-input"
-                            onChange={(e) => {
-                                setName(e.target.value);
-                                setErrors(prev => ({ ...prev, name: null }));
-                            }} placeholder="Name" />
+                        name="name"
+                        rules={[{ required: true, message: "Name is required" }]}>
+                        <Input className="form-item-input"
+                            placeholder="Name" />
                     </Form.Item>
                     {/* Email */}
                     <Form.Item
                         label="Email"
-                        validateStatus={errors.email ? "error" : ""}
-                        help={errors.email?.[0] || ""}
+                        name="email"
+                        rules={[{ required: true, message: "Email is required" }]}>
+
+                        <Input className="form-item-input"
+                            placeholder="abc@gmail.com" />
+                    </Form.Item>
+                    {/* Phone */}
+                    <Form.Item
+                        label="Phone"
+                        name="phone"
+                        rules={[
+                            { required: true, message: "Please enter phone number" },
+                            {
+                                pattern: /^03[0-9]{9}$/, // Pakistan mobile numbers
+                                message: "Enter a valid Pakistan mobile number (e.g., 03001234567)"
+                            },
+                        ]}
                     >
                         <Input
-                            type="text" value={email}
                             className="form-item-input"
-                            onChange={(e) => {
-                                setEmail(e.target.value);
-                                setErrors(prev => ({ ...prev, email: null }));
-                            }} placeholder="abc@gmail.com" />
-                    </Form.Item>
-                    {/* Password */}
-                    <Form.Item
-                        label="Password"
-                        validateStatus={errors.password ? "error" : ""}
-                        help={errors.password?.[0] || ""}
-                    >
-                        <Input.Password
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                                setErrors(prev => ({ ...prev, password: null }));
-                            }}
-                            iconRender={visible => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
+                            placeholder="03xxxxxxxxx"
+                            maxLength={11}
                         />
                     </Form.Item>
                     {/* Province */}
                     <Form.Item
+                        name="province_id"
                         style={{ width: "25%" }}
                         label="Province"
                         validateStatus={errors.province_id ? "error" : ""}
-                        help={errors.province_id?.[0] || ""}>
-                        <Select value={provinceId || undefined}
-                            placeholder="Select Province"
+                        rules={[{ required: true, message: "Province is required" }]}>
+                        <Select placeholder="Select Province"
                             onChange={async (value) => {
-                                setProvinceId(value);
-                                setDistrictId("");
-                                setTehsilId("");
-                                setformTehsils([]);
                                 await fetchDistrictsByProvince(value);
-                                setErrors(prev => ({ ...prev, province_id: null }));
                             }}
                             style={{ width: "100%" }}
                         >
@@ -321,17 +328,13 @@ function Users() {
                     </Form.Item>
                     {/* District */}
                     <Form.Item
+                        name="district_id"
                         label="District"
                         style={{ width: "25%" }}
-                        validateStatus={errors.district_id ? "error" : ""}
-                        help={errors.district_id?.[0] || ""}>
-                        <Select value={districtId || undefined}
-                            placeholder="Select District"
+                        rules={[{ required: true, message: "District is required" }]}>
+                        <Select placeholder="Select District"
                             onChange={async (value) => {
-                                setDistrictId(value)
-                                setTehsilId("");
                                 await fetchTehsilsByDistrict(value);
-                                setErrors(prev => ({ ...prev, district_id: null }));
                             }}>
                             {formDistricts.map((d) => (
                                 <Option key={d.id} value={d.id}>{d.name}</Option>
@@ -340,23 +343,17 @@ function Users() {
                     </Form.Item>
                     {/* Tehsil */}
                     <Form.Item
+                        name="tehsil_id"
                         label="Tehsil"
                         style={{ width: "25%" }}
-                        validateStatus={errors.tehsil_id ? "error" : ""}
-                        help={errors.tehsil_id?.[0] || ""}>
-                        <Select value={tehsilId || undefined}
-                            placeholder="Select Tehsil"
-                            onChange={(value) => {
-                                setTehsilId(value)
-                                setErrors(prev => ({ ...prev, tehsil_id: null }));
-                            }}>
+                        rules={[{ required: true, message: "Tehsil is required" }]}>
+                        <Select placeholder="Select Tehsil">
                             {formTehsils.map((t) => (
                                 <Option key={t.id} value={t.id}>{t.name}</Option>
                             ))}
                         </Select>
                     </Form.Item>
-                    {/* Action Buttons */}
-                    {/* Action buttons logic */}
+                    {/* Action buttons */}
                     <Form.Item wrapperCol={{ offset: 6 }} >
                         <Space>
                             <Button
@@ -366,7 +363,7 @@ function Users() {
                                 icon={editId ? <EditOutlined /> : <PlusOutlined />}
                             // loading={loading}
                             >
-                                {editId ? "Update User" : "Add User"}
+                                {editId ? "Update Member" : "Add Member"}
                             </Button>
 
                             {editId && (
@@ -374,33 +371,17 @@ function Users() {
                                     danger
                                     icon={<CloseOutlined />}
                                     onClick={() => {
-                                        setEditId(null);
-                                        setName("");
-                                        setEmail("");
-                                        setPassword("");
-                                        setProvinceId("");
-                                        setDistrictId("");
-                                        setTehsilId("");
-                                        setErrors("");
+                                        resetForm();
                                     }}
                                 >
                                     Cancel
                                 </Button>
                             )}
-                            {resetForm && (
+                            {!editId && isFormNotEmpty() && (
                                 <Button
                                     className="reset-btn"
                                     icon={<ReloadOutlined />}
-                                    onClick={() => {
-                                        setEditId(null);
-                                        setName("");
-                                        setEmail("");
-                                        setPassword("");
-                                        setProvinceId("");
-                                        setDistrictId("");
-                                        setTehsilId("");
-                                        setErrors("");
-                                    }}
+                                    onClick={resetForm}
                                     block>
                                     Reset
                                 </Button>
@@ -412,7 +393,7 @@ function Users() {
             <div className="content-row">
                 {/* Table Block */}
                 <div className="table-wrapper">
-                    <h3>Users List</h3>
+                    <h3>Members List</h3>
                     <div className="table-container">
                         <Table
                             columns={columns}
@@ -420,14 +401,14 @@ function Users() {
                             loading={loading}
                             pagination={{ pageSize: 5 }}
                             locale={{
-                                emptyText: <Empty description="No Users Records Found" />,
+                                emptyText: <Empty description="No Members Records Found" />,
                             }}
                         />
                     </div>
                 </div>
                 {/* Map Block */}
                 <div className="map-wrapper map-custom">
-                    <h3>Users Map</h3>
+                    <h3>Members Map</h3>
                     <MapContainer
                         center={[30.3753, 69.3451]}
                         zoom={5}
@@ -443,26 +424,37 @@ function Users() {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
 
-                        {users.map(
-                            (u) =>
-                                u.tehsil?.latitude &&
-                                u.tehsil?.longitude && (
-                                    <Marker
-                                        key={u.id}
-                                        position={[
-                                            parseFloat(u.tehsil.latitude),
-                                            parseFloat(u.tehsil.longitude),
-                                        ]}
-                                        icon={greenIcon}
-                                    >
-                                        <Popup>
-                                            <strong>{u.name}</strong>
-                                            <br />
-                                            {u.province.name}, {u.district.name}, {u.tehsil.name}
-                                        </Popup>
-                                    </Marker>
-                                )
-                        )}
+                        {Object.values(groupedUsers).map(group => {
+                            const first = group[0];
+
+                            // Add count to your existing icon
+                            const iconWithCount = L.divIcon({
+                                html: `<div style="position: relative;">
+                                    <img src="${greenIcon.options.iconUrl}" width="32" height="32"/>
+                                    <span style="position:absolute;top:0;right:0;background:#fff;color:#198754;border-radius:50%;padding:2px 6px;font-size:12px;font-weight:bold;">
+                                    ${group.length}
+                                    </span>
+                                </div>`,
+                                className: "",
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 32],
+                                popupAnchor: [0, -32],
+                            });
+
+                            return (
+                                <Marker
+                                    key={first.tehsil.id}
+                                    position={[parseFloat(first.tehsil.latitude), parseFloat(first.tehsil.longitude)]}
+                                    icon={iconWithCount}
+                                >
+                                    <Popup>
+                                        <strong>{first.province.name}, {first.district.name}, {first.tehsil.name}</strong>
+                                        <br />
+                                        <strong>Total Members: {group.length}</strong>
+                                    </Popup>
+                                </Marker>
+                            );
+                        })}
                     </MapContainer>
                 </div>
             </div>
