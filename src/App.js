@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import ProvinceList from "./components/ProvinceList";
 import DistrictList from "./components/DistrictList";
@@ -6,7 +6,9 @@ import TehsilList from "./components/TehsilList";
 import UserList from "./components/UserList";
 import NaapBook from "./components/NaapBookList";
 
+
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { Column } from '@ant-design/charts';
 
 import { Layout, Menu, Result } from "antd";
 import { AppstoreOutlined, EnvironmentOutlined, BankOutlined, UserOutlined, DashboardOutlined, WindowsOutlined, FormOutlined } from "@ant-design/icons";
@@ -17,7 +19,6 @@ function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedKey = location.pathname === "/" ? "" : location.pathname.replace("/", "");
-
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Sidebar */}
@@ -117,7 +118,6 @@ function AppLayout() {
     </Layout>
   );
 }
-
 export default function App() {
   const [refresh, setRefresh] = useState(false);
   const refreshList = () => setRefresh(!refresh);
