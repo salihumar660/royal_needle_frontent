@@ -310,6 +310,7 @@
 .ant-layout-sider-trigger {
   background-color: #198754 !important;
   color: #fff !important;
+  display: none;
 }
 
 .ant-menu-vertical {

@@ -5,13 +5,15 @@ import DistrictList from "./components/DistrictList";
 import TehsilList from "./components/TehsilList";
 import UserList from "./components/UserList";
 import NaapBook from "./components/NaapBookList";
+import Orders from "./components/OrderList";
+import Dashboard from "./components/Dashboard";
 
 
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { Column } from '@ant-design/charts';
 
 import { Layout, Menu, Result } from "antd";
-import { AppstoreOutlined, EnvironmentOutlined, BankOutlined, UserOutlined, DashboardOutlined, WindowsOutlined, FormOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, EnvironmentOutlined, BankOutlined, UserOutlined, DashboardOutlined, WindowsOutlined, FormOutlined, OrderedListOutlined } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
 
@@ -47,6 +49,7 @@ function AppLayout() {
           selectedKeys={[selectedKey]}
           onClick={({ key }) => navigate(`/${key}`)}
           items={[
+            { key: "dashboard", label: "Dashboard" },
             {
 
               key: "location",
@@ -74,36 +77,50 @@ function AppLayout() {
                 { key: "NaapBook", label: "NaapBook List" },
               ],
             },
+            {
+              key: "Orders",
+              icon: <OrderedListOutlined style={{ color: "#fff" }} />,
+              label: "Orders Management",
+              children: [
+                { key: "Orders", label: "Orders List" },
+              ],
+            },
           ]}
         />
       </Sider>
 
       {/* Main Content */}
-      <Layout style={{ marginLeft: 200 }}>
+      <Layout style={{ marginLeft: 200, marginTop: 0 }}>
         <Header
           style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            left: 200, // 👈 IMPORTANT (same width as Sider)
+            zIndex: 1001,
             background: "#fff",
             padding: "0 20px",
             fontSize: "18px",
             fontWeight: "bold",
-            // position: "fixed",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)"
           }}
         >
           Dashboard
         </Header>
 
-        <Content style={{ margin: "20px", background: "#fff", padding: "20px" }}>
+        <Content
+          style={{
+            margin: "20px", marginTop: 80, background: "#fff", padding: "20px", minHeight: "calc(100vh - 80px)"
+          }}>
           <Routes>
             <Route
               path="/"
               element={
-                <Result
-                  icon={<WindowsOutlined style={{ color: "#198754" }} />}
-                  title="Welcome to Royal Needle Dashboard"
-                  subTitle="Select a module from the sidebar to manage data."
-                />
+                <Navigate to="/dashboard" replace />
               }
             />
+            {/* Dashboard Module */}
+            <Route path="/dashboard" element={<Dashboard />} />
             {/* Location Module */}
             <Route path="/provinces" element={<ProvinceList />} />
             <Route path="/districts" element={<DistrictList />} />
@@ -112,10 +129,12 @@ function AppLayout() {
             <Route path="/user" element={<UserList />} />
             {/* NaapBook Module */}
             <Route path="/naapBook" element={<NaapBook />} />
+            <Route path="/Orders" element={<Orders />} />
           </Routes>
         </Content>
       </Layout>
-    </Layout>
+    </Layout >
+
   );
 }
 export default function App() {
