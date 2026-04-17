@@ -59,6 +59,7 @@ function NaapBook() {
     const [viewModalVisible, setViewModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [form] = Form.useForm();
+    const [search, setSearch] = useState("");
     const [naapCode, setNaapCode] = useState("");
     const [antdForm] = Form.useForm();
     const [editId, setEditId] = useState(null);
@@ -253,35 +254,45 @@ function NaapBook() {
             message.error("Failed to generate code");
         }
     }
-    const dataSource = naapBooks.map((nb, index) => ({
+    const dataSource = (Array.isArray(naapBooks) ? naapBooks : []).map((nb, index) => ({
         key: nb.id,
         index: index + 1,
         ...nb,
     }));
+    const hasFilters = search;
     //1. fetch all naaps
     const fetchMeasurement = async () => {
         try {
-            const res = await api.get("http://localhost:8000/api/naapBook");
-            setNaapBooks(res.data);
+            setLoading(true);
+            const res = await axios.get(`http://localhost:8000/api/naapBook?search=${search}`);
+            setNaapBooks(res.data.data || []);
         } catch (error) {
             console.log(error);
+            message.error("Failed to fetch naap books");
+            setNaapBooks([]);
+        } finally {
+            setLoading(false);
         }
     }
     useEffect(() => {
         fetchMeasurement();
-    }, []);
+    }, [search]);
     // Location data for dropdowns
     const fetchProvinces = async () => {
         try {
-            const res = await api.get("http://localhost:8000/api/provinces");
-            setProvinces(res.data);
+            const res = await axios.get(`http://localhost:8000/api/provinces`);
+            setProvinces(res.data || []);
         } catch (error) {
             console.log(error);
+            message.error("Failed to fetch provinces");
+            setProvinces([]);
+        } finally {
+            setLoading(false);
         }
     }
     useEffect(() => {
         fetchProvinces();
-    }, []);
+    }, [search]);
     //2. fetch districts against province
     const fetchDistrictsByProvince = async (provinceId) => {
         if (!provinceId) {
@@ -291,14 +302,17 @@ function NaapBook() {
         }
         try {
             const res = await axios.get(
-                `http://localhost:8000/api/provinces/${provinceId}/districts`
+                `http://localhost:8000/api/provinces/${provinceId}/districts?search=${search}`
             );
-            setformDistricts(res.data);
+            setformDistricts(res.data || []);
             setDistrictId("");
             return Promise.resolve();
         } catch (err) {
             console.error(err);
+            message.error("Failed to fetch districts");
             return Promise.reject(err);
+        } finally {
+            setLoading(false);
         }
     };
     useEffect(() => {
@@ -319,7 +333,7 @@ function NaapBook() {
             }
         };
         fetchDistricts();
-    }, [selectedProvince]);
+    }, [selectedProvince, search]);
     // 3. fetch tehsils against district
     const fetchTehsilsByDistrict = async (districtId) => {
         if (!districtId) {
@@ -329,12 +343,13 @@ function NaapBook() {
         }
         try {
             const res = await axios.get(
-                `http://localhost:8000/api/districts/${districtId}/tehsils`
+                `http://localhost:8000/api/districts/${districtId}/tehsils?search=${search}`
             );
             setformTehsils(res.data);
             setTehsilId("");
         } catch (err) {
             console.error(err);
+            message.error("Error fetching tehsils");
         }
     };
     useEffect(() => {
@@ -355,7 +370,7 @@ function NaapBook() {
             }
         };
         fetchTehsils();
-    }, [selectedDistrict]);
+    }, [selectedDistrict, search]);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setNaapForm(prevForm => ({
@@ -744,6 +759,27 @@ function NaapBook() {
                     </Row>
                 </Form>
             </Modal>
+            <div style={{ marginBottom: "10px" }} className="search-form">
+                <input
+                    type="text"
+                    placeholder="Search Naap..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+                {hasFilters && (
+                    <Col xs={24} sm={12} md={2}>
+                        <Button
+                            className="reset-btn"
+                            icon={<ReloadOutlined />}
+                            onClick={() => {
+                                setSearch("");
+                            }}
+                            block>
+                            Reset
+                        </Button>
+                    </Col>
+                )}
+            </div>
             {/* </div> */}
             <div className="content-row">
                 {/* Table Block */}

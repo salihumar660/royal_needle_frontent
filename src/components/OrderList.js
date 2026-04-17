@@ -518,7 +518,7 @@ function Order() {
                             columns={columns}
                             dataSource={dataSource}
                             loading={loading}
-                            pagination={{ pageSize: 5 }}
+                            pagination={{ pageSize: 10 }}
                             locale={{
                                 emptyText: <Empty description="No Order Records Found" />,
                             }}

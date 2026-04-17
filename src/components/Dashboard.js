@@ -29,7 +29,9 @@ function Dashboard() {
         const usersRes = await api.get("/users");
         const naapRes = await api.get("/naapBook");
         const orderRes = await api.get("/orders");
-        const ordersData = orderRes.data;
+        const ordersData = Array.isArray(orderRes.data)
+            ? orderRes.data
+            : orderRes.data?.data || orderRes.data?.orders || [];
         setUsers(usersRes.data);
         setBooks(naapRes.data);
         setOrders(ordersData);
@@ -65,7 +67,7 @@ function Dashboard() {
             processStatus(orders, selectedYear);
         }
     }, [selectedYear]);
-    const processRevenue = (data, year) => {
+    const processRevenue = (data = [], year) => {
         const monthly = {};
         const filteredData = year
             ? data.filter(order =>
@@ -85,7 +87,7 @@ function Dashboard() {
             }));
         setRevenueData(formatted);
     };
-    const processStatus = (data, year) => {
+    const processStatus = (data = [], year) => {
         const grouped = {};
         const filteredData = year
             ? data.filter(order =>
